@@ -3,14 +3,7 @@ const clearBtn = document.querySelector('#clear');
 const sendBtn = document.querySelector('#send');
 const ctx = canvas.getContext('2d');
 
-// canvas.width = window.innerWidth - canvas.offsetLeft;
-// canvas.height = window.innerHeight - canvas.offsetTop;
-
 let isDrawing = false;
-
-// var rect = canvas.getBoundingClientRect();
-// var scaleX = 1;
-// var scaleY = 1;
 
 const draw = (e) => {
   if (isDrawing) {
@@ -41,6 +34,8 @@ canvas.addEventListener('mouseup', (_) => {
 canvas.addEventListener('mousemove', draw);
 
 clearBtn.addEventListener('click', (_) => {
+  const predictions = document.getElementById('predictions');
+  predictions.innerHTML = '';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 

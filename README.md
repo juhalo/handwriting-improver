@@ -27,4 +27,4 @@ The general look:
 
 ## Credits
 
-To-do
+Background image by Pete Linforth from [pixabay.com](https://pixabay.com/photos/connection-hand-human-robot-touch-3308188/) under the Creative Commons Zero (CC0) license.
