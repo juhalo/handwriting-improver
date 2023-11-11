@@ -6,12 +6,11 @@ Write a letter in the English alphabet and see if an AI can understand it. Can b
 
 ## Table of Contents
 
-[Data]
-
+- [Data](#data)
 - [To-do](#to-do)
 - [Deployment](#deployment)
 - [Layout](#layout)
-- [To-do](#credits)
+- [Credits](#credits)
 
 # Data
 
