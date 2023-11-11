@@ -171,6 +171,30 @@ def training(model: CNN, loss_function: nn.NLLLoss, optimizer: optim.Adam, devic
     print(dev_accuracies)
 
 
+def test(model: CNN, loss_function: nn.NLLLoss, device: torch.device,
+         test_loader: torch.utils.data.DataLoader) -> None:
+    """Testing loop for the CNN."""
+    test_loss = 0
+    test_correct = 0
+    total = 0
+
+    with torch.no_grad():
+        for batch_num, (data, target) in enumerate(test_loader):
+            data, target = data.to(device), target.to(device)
+            # WRITE CODE HERE
+            pred = model(data)
+            loss = loss_function(pred, target)
+
+            total += len(data)
+            test_loss += loss.item()
+            test_correct += (pred.argmax(1) ==
+                             target).type(torch.float).sum().item()
+
+            print('Evaluating: Batch %d/%d: Loss: %.4f | Test Acc: %.3f%% (%d/%d)' %
+                  (batch_num+1, len(test_loader), test_loss / (batch_num + 1),
+                   100. * test_correct / total, test_correct, total))
+
+
 def main(split: bool):
     "Handles the main loop of the CNN creation process."
     if split:
@@ -189,6 +213,8 @@ def main(split: bool):
     loss_function = nn.NLLLoss()
 
     training(model, loss_function, optimizer, device, train_loader, dev_loader)
+    test(model, loss_function, device, test_loader)
+    torch.save(model, MODELS_DIR + 'entire_model.pth')
 
 
 if __name__ == "__main__":
