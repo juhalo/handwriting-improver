@@ -18,6 +18,43 @@ import string
 from my_constants import *
 
 
+class CNN(nn.Module):
+    """Class for the CNN."""
+
+    def __init__(self, num_classes=NUM_CLASSES):
+        super(CNN, self).__init__()
+        self.flatten = nn.Flatten()
+        self.conv = nn.Sequential(
+            nn.Conv2d(NUM_CHANNELS, 20, (5, 5)),
+            # nn.BatchNorm2d(20),
+            nn.ReLU(),
+            # nn.Tanh(),
+            nn.MaxPool2d((2, 2), stride=(2, 2)),
+            nn.Conv2d(20, 50, (5, 5)),
+            # nn.BatchNorm2d(50),
+            nn.ReLU(),
+            # nn.Tanh(),
+            nn.MaxPool2d((2, 2), stride=(2, 2))
+            # Added
+            # nn.Conv2d(50, 50, (5,5)),
+            # nn.ReLU(),
+            # nn.MaxPool2d((2,2), stride = (2,2))
+        )
+        self.lin = nn.Sequential(
+            nn.Linear(4*4*50, 500),
+            nn.ReLU(),
+            # nn.Tanh(),
+            nn.Linear(500, num_classes),
+            nn.LogSoftmax(dim=1)
+        )
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.flatten(x)
+        x = self.lin(x)
+        return x
+
+
 def split_to_folders() -> None:
     "Splits the images to train, dev, test folders"
     alphabets = list(string.ascii_uppercase)
@@ -69,11 +106,89 @@ def create_loaders() -> tuple[torch.utils.data.DataLoader, torch.utils.data.Data
     return train_loader, dev_loader, test_loader
 
 
+def training(model: CNN, loss_function: nn.NLLLoss, optimizer: optim.Adam, device: torch.device,
+             train_loader: torch.utils.data.DataLoader, dev_loader: torch.utils.data.DataLoader) -> None:
+    """"Training loop for the CNN."""
+    dev_loss = math.inf
+    dev_losses = []
+    dev_accuracies = []
+    stop_early = False
+
+    for epoch in range(N_EPOCHS):
+        if stop_early:
+            break
+        train_loss = 0
+        train_correct = 0
+        total = 0
+        for batch_num, (data, target) in enumerate(train_loader):
+            data, target = data.to(device), target.to(device)
+            pred = model(data)
+            loss = loss_function(pred, target)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total += len(data)
+            train_loss += loss.item()
+            train_correct += (pred.argmax(1) ==
+                              target).type(torch.float).sum().item()
+
+            print('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' %
+                  (epoch+1, batch_num+1, len(train_loader), train_loss / (batch_num + 1),
+                   100. * train_correct / total, train_correct, total))
+
+        cur_dev_loss = 0
+        dev_correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for batch_num, (data, target) in enumerate(dev_loader):
+                data, target = data.to(device), target.to(device)
+                pred = model(data)
+                loss = loss_function(pred, target)
+
+                total += len(data)
+                cur_dev_loss += loss.item()
+                dev_correct += (pred.argmax(1) ==
+                                target).type(torch.float).sum().item()
+
+            current_loss = cur_dev_loss / (len(dev_loader) + 1)
+            dev_losses.append(current_loss)
+            current_accuracy = 100. * dev_correct / total
+            dev_accuracies.append(current_accuracy)
+
+            if current_loss <= dev_loss:
+                dev_loss = current_loss
+            else:
+                stop_early = True
+
+            print('Evaluating: Batch %d/%d: Loss: %.4f | Dev Acc: %.3f%% (%d/%d)' %
+                  (batch_num+1, len(dev_loader), cur_dev_loss / (len(dev_loader) + 1),
+                   100. * dev_correct / total, dev_correct, total))
+
+    print(dev_losses)
+    print(dev_accuracies)
+
+
 def main(split: bool):
     "Handles the main loop of the CNN creation process."
     if split:
         split_to_folders()
     train_loader, dev_loader, test_loader = create_loaders()
+
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
+    model = CNN().to(device)
+    optimizer = optim.Adam(model.parameters(), lr=LR,
+                           weight_decay=WEIGHT_DECAY)
+    # optimizer = optim.SGD(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY, momentum=MOMENTUM)
+    loss_function = nn.NLLLoss()
+
+    training(model, loss_function, optimizer, device, train_loader, dev_loader)
 
 
 if __name__ == "__main__":
