@@ -49,6 +49,7 @@ class CNN(nn.Module):
         )
 
     def forward(self, x):
+        """"Forward pass of the CNN."""
         x = self.conv(x)
         x = self.flatten(x)
         x = self.lin(x)
@@ -66,12 +67,27 @@ def split_to_folders() -> None:
         for alphabet in alphabets:
             if not os.path.exists(path + alphabet + "/"):
                 os.makedirs(path + alphabet + "/")
+    image_amount = {}
+    smallest_amount = math.inf
+
+    for alphabet in alphabets:
+        count = 0
+        for path in os.listdir(IMAGES_DIR + alphabet):
+            # check if current path is a file
+            if os.path.isfile(os.path.join(IMAGES_DIR + alphabet, path)):
+                count += 1
+        image_amount[alphabet] = count
+        if count < smallest_amount:
+            smallest_amount = count
+    print(smallest_amount)
     for alphabet_path in alphabet_paths:
         alphabet = alphabet_path.split("/")[-2]
+        alphabet_amount = image_amount[alphabet]
+        ratio = int((alphabet_amount / smallest_amount)+0.5)
         image_file_names = os.listdir(alphabet_path)
         for image_file_name in image_file_names:
             image_full_path = alphabet_path + image_file_name
-            if os.path.isfile(image_full_path):
+            if os.path.isfile(image_full_path) and ra.randint(1, ratio) == 1:
                 division = ra.randint(1, 4)
                 if division in (1, 2):
                     shutil.copyfile(image_full_path, TRAIN_DIR +
