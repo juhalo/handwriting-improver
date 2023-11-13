@@ -216,4 +216,4 @@ def main(split: bool):
 
 
 if __name__ == "__main__":
-    main(True)
+    main(False)

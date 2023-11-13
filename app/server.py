@@ -1,18 +1,21 @@
 """Provides server functionality for the app."""
+from string import ascii_uppercase
 from fastapi import FastAPI, UploadFile, Request
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from PIL import Image
-from string import ascii_uppercase
 
 import torch
 from torchvision import transforms
+import torch.nn as nn
 
-from cnn.cnn import CNN
+from cnn_model import CNN
 
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory='templates')
 
 
 @app.get("/")
@@ -21,9 +24,10 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-CUR_MODEL_PATH = "./models/entire_model.pth"
+CUR_DICT_PATH = "./models/only_dict.pth"
 
-model = torch.load(CUR_MODEL_PATH)
+model = CNN()
+model.load_state_dict(torch.load(CUR_DICT_PATH))
 
 
 def get_prediction(img):
@@ -41,7 +45,6 @@ def get_prediction(img):
 @app.post("/predict")
 def predict(file: UploadFile):
     """When making POST request to /predict, runs the CNN for the provided image."""
-    # Read Image
     img = Image.open(file.file)
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=3),
@@ -51,10 +54,8 @@ def predict(file: UploadFile):
     img_transform = transform(img).float()
     img_transform = img_transform.unsqueeze_(0)
 
-    # Use the model to generate a prediction
     prediction = get_prediction(img_transform)
 
-    # Return the prediction as a JSON response
     return prediction
 
 
