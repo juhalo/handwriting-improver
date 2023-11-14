@@ -2,7 +2,7 @@
 
 ## Description
 
-Write a letter in the English alphabet and see if an AI can understand it. Can be used to improve your handwriting or for playing around to see how an image recognition machine learning algorithm might work.
+Write a upper case letter in the English alphabet and see if an AI can understand it. Can be used to improve your handwriting or for playing around to see how an image recognition machine learning algorithm might work. You can save the letter you created, upload an image for the model to guess, or use the canvas to make an image and send it to the model. Uses FastAPI and uvicorn for the server side and PyTorch to make the CNN.
 
 ## Table of Contents
 
@@ -18,7 +18,10 @@ The data used is handwritten English upper-case letters. The dataset has been co
 
 # To-do
 
-To-do
+- [ ] Make background image work when running with uvicorn
+- [ ] Improve the look of the website
+- [ ] Maybe train a new, better model
+- [ ] Consider removing the edges of submitted images (box around the given letter) so that we can resize/center image better
 
 # Deployment
 
@@ -28,7 +31,7 @@ Deployment: [here (to-do)](https://todo/)
 
 The general look:
 
-![Layout of the page (to-do)](./)
+![Layout of the page (to-do)](./app/img/layout.PNG)
 
 ## Credits
 
