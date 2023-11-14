@@ -46,12 +46,14 @@ canvas.addEventListener('mouseup', (_) => {
 
 canvas.addEventListener('mousemove', draw);
 
-clearBtn.addEventListener('click', (_) => {
+function clear() {
   const predictions = document.getElementById('predictions');
   predictions.innerHTML = '';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   initializeCanvas();
-});
+}
+
+clearBtn.addEventListener('click', clear);
 
 sendBtn.addEventListener('click', async (_) => {
   sendBtn.disabled = true;
@@ -84,13 +86,14 @@ sendBtn.addEventListener('click', async (_) => {
   });
 
   const json_response = await response.json();
-  prediction.innerHTML = json_response.prediction;
+  prediction.innerHTML = 'Prediction: ' + json_response.prediction;
   sendBtn.disabled = false;
 });
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   loadBtn.disabled = true;
+  clear();
   const file = input.files[0];
   const formData = new FormData();
   formData.append('file', file);
@@ -100,7 +103,7 @@ form.addEventListener('submit', async (event) => {
   });
 
   const json_response = await response.json();
-  prediction.innerHTML = json_response.prediction;
+  prediction.innerHTML = 'Prediction: ' + json_response.prediction;
   loadBtn.disabled = false;
 });
 
