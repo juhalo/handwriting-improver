@@ -1,14 +1,15 @@
 """Provides server functionality for the app."""
 from string import ascii_uppercase
+import numpy as np
 from fastapi import FastAPI, UploadFile, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 from PIL import Image
+from PIL import ImageOps
 
 import torch
 from torchvision import transforms
-import torch.nn as nn
 
 from cnn_model import CNN
 
@@ -21,6 +22,7 @@ templates = Jinja2Templates(directory='templates')
 @app.get("/")
 def home(request: Request):
     """Returns the main page."""
+    print("Index:")
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -42,19 +44,42 @@ def get_prediction(img):
         return return_dict
 
 
-@app.post("/predict")
+@app.post("/predict/")
 def predict(file: UploadFile):
     """When making POST request to /predict, runs the CNN for the provided image."""
+    print("Predict:")
+    print(file.file)
+    print(file.content_type)
+    print(file.filename)
+    print(type(file.file))
     img = Image.open(file.file)
+    img_numpy = np.asarray(img)
+    num_black = (img_numpy == 0).sum()
+    num_white = (img_numpy == 255).sum()
+    is_not_inverted = num_black < num_white
+
+    if is_not_inverted:
+        # https://stackoverflow.com/questions/2498875/how-to-invert-colors-of-image-with-pil-python-imaging
+        if img.mode == 'RGBA':
+            r, g, b, _ = img.split()
+            rgb_image = Image.merge('RGB', (r, g, b))
+            img_invert = ImageOps.invert(rgb_image)
+        else:
+            img_invert = ImageOps.invert(img)
+    else:
+        img_invert = img
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=3),
         transforms.Resize(28),
         transforms.ToTensor()
     ])
-    img_transform = transform(img).float()
+    print("Here2")
+    img_transform = transform(img_invert).float()
     img_transform = img_transform.unsqueeze_(0)
 
     prediction = get_prediction(img_transform)
+    print("Here3")
+    print(prediction)
 
     return prediction
 
