@@ -4,7 +4,7 @@ body {
   height: 100%;
   overflow: hidden;
   color: white;
-  background-image: url('../img/background-ai.jpg');
+  /* background-image: url('../img/background-ai.jpg'); */
 }
 
 .container {
@@ -43,7 +43,7 @@ button {
   height: 90vh;
   /* width: 90vh;
   height: 90%; */
-  background-color: white;
+  background-color: black;
 }
 
 #drawing-board {
