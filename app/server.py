@@ -22,7 +22,6 @@ templates = Jinja2Templates(directory='templates')
 @app.get("/")
 def home(request: Request):
     """Returns the main page."""
-    print("Index:")
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -47,11 +46,6 @@ def get_prediction(img):
 @app.post("/predict/")
 def predict(file: UploadFile):
     """When making POST request to /predict, runs the CNN for the provided image."""
-    print("Predict:")
-    print(file.file)
-    print(file.content_type)
-    print(file.filename)
-    print(type(file.file))
     img = Image.open(file.file)
     img_numpy = np.asarray(img)
     num_black = (img_numpy == 0).sum()
@@ -73,13 +67,11 @@ def predict(file: UploadFile):
         transforms.Resize(28),
         transforms.ToTensor()
     ])
-    print("Here2")
+
     img_transform = transform(img_invert).float()
     img_transform = img_transform.unsqueeze_(0)
 
     prediction = get_prediction(img_transform)
-    print("Here3")
-    print(prediction)
 
     return prediction
 

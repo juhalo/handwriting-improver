@@ -4,7 +4,7 @@ COPY . /app
 WORKDIR /app
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir -f https://download.pytorch.org/whl/torch/ -f https://download.pytorch.org/whl/torchaudio/ -f https://download.pytorch.org/whl/torchvision/
 
 WORKDIR /app/app
 
