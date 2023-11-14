@@ -8,6 +8,7 @@ Write a upper case letter in the English alphabet and see if an AI can understan
 
 - [Data](#data)
 - [To-do](#to-do)
+- [Running Locally](#running-locally)
 - [Deployment](#deployment)
 - [Layout](#layout)
 - [Credits](#credits)
@@ -22,6 +23,21 @@ The data used is handwritten English upper-case letters. The dataset has been co
 - [ ] Improve the look of the website
 - [ ] Maybe train a new, better model
 - [ ] Consider removing the edges of submitted images (box around the given letter) so that we can resize/center image better
+
+## Running Locally
+
+Below are the steps needed to take for you to run the project locally, when using Docker:
+
+0. Make sure you have Docker installed
+1. Make sure you have the stable internet connection to download the required libraries etc.
+2. (This may or may not be necessary depending on your operating system etc.) Start Docker Desktop or something similar
+3. Go to the same folder where this README.md is on the root folder
+4. Type "docker build -t handwriting-improver . && docker run --rm -it -p 8000:8000 handwriting-improver"
+5. Use curl commands or your browser (at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)) to use the application.
+
+You can also create a virtual environment (with Python 3.11.6) and use the requirements.txt to download the required libraries. Then go to the app folder and just run "uvicorn server:app --reload".
+
+If you do not want to use the CPU versions of torch, torchaudio, and torchvision, then you can remove the "+cpu" part from their corresponding rows in requirements.txt. If you want to do that and use Docker, you may remove the "-f" flags and the links related to them since these were added because the official Python Docker Images do not have the CPU versions of the three libraries, mentioned above, natively.
 
 # Deployment
 
